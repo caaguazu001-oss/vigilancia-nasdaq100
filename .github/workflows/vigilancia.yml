@@ -1,0 +1,58 @@
+name: Vigilancia Nasdaq-100
+
+on:
+  schedule:
+    - cron: "45 13,14 * * 1-5"
+    - cron: "30 15 * * 1-5"
+    - cron: "15 20,21 * * 1-5"
+    - cron: "15 22 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      ventana:
+        description: "Qué ejecutar"
+        type: choice
+        options: [prueba, cierre, apertura, auto]
+        default: prueba
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vigilancia-nasdaq100
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Ejecutar bot
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RSI_UMBRAL: ${{ vars.RSI_UMBRAL }}
+          MODO_ALERTA: ${{ vars.MODO_ALERTA }}
+        run: python bot.py --ventana "${{ github.event.inputs.ventana || 'auto' }}"
+      - name: Guardar estado
+        if: always()
+        run: |
+          [ -f state.json ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Estado del bot $(date -u +%F' '%H:%M) UTC"
+          git pull --rebase --quiet || true
+          git push
