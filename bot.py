@@ -415,7 +415,7 @@ def _email_configurado() -> bool:
 
 def _email(asunto: str, texto: str) -> None:
     """Envía por SMTP. Por defecto usa Gmail y se envía el correo a sí mismo."""
-    usuario = _env("CAAGUAZU001@GMAIL.COM")
+    usuario = _env("SMTP_USER")
     destinos = [d.strip() for d in _env("EMAIL_TO", usuario).split(",") if d.strip()]
     msg = EmailMessage()
     msg["Subject"] = asunto
@@ -429,7 +429,7 @@ def _email(asunto: str, texto: str) -> None:
         servidor = smtplib.SMTP(host, puerto, timeout=30)
         servidor.starttls()
     with servidor:
-        servidor.login(usuario, _env("dkqx xuwo hsrt uruv").replace(" ", ""))
+        servidor.login(usuario, _env("SMTP_PASS").replace(" ", ""))
         servidor.send_message(msg)
 
 
