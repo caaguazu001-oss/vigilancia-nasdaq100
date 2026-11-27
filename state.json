@@ -194,6 +194,12 @@
         "estado": "ok",
         "hora": "10:40",
         "intentos": 0
+      },
+      "cierre": {
+        "alertas": 0,
+        "estado": "ok",
+        "hora": "17:03",
+        "intentos": 0
       }
     }
   }
