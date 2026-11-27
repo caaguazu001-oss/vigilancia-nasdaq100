@@ -187,6 +187,14 @@
         "hora": "17:03",
         "intentos": 0
       }
+    },
+    "2026-11-27": {
+      "apertura": {
+        "alertas": 0,
+        "estado": "ok",
+        "hora": "10:40",
+        "intentos": 0
+      }
     }
   }
 }
